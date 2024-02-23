@@ -13,17 +13,17 @@ func RunInBackground(name string, f func() error, every time.Duration) {
 			func() {
 				defer func() {
 					if r := recover(); r != nil {
-						log.Printf("background process(%v): %v", name, r)
+						log.Printf("bg_process(%v): %v", name, r)
 					}
 				}()
 
-				log.Printf("background process(%v): starting", name)
+				log.Printf("bg_process(%v): starting", name)
 
 				if err := f(); err != nil {
-					log.Printf("background process(%v): err: %v", name, err.Error())
+					log.Printf("bg_process(%v): err: %v", name, err.Error())
 				}
 
-				log.Printf("background process(%v): ending", name)
+				log.Printf("bg_process(%v): ending", name)
 
 				<-time.After(every)
 			}()

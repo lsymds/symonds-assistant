@@ -10,31 +10,34 @@ import (
 	"github.com/lsymds/symonds-assistant/internal/core/utils"
 )
 
+// PackageName is the descriptive name of the package.
+const PackageName = "bew - Better eBay Watchlist"
+
 // Register registers all neccessary functionality for the Better eBay Watchlist package to work.
 func Register(channelID string, db *sqlite.Database, d *discord.Discord) error {
-	b := wrapper{
+	w := wrapper{
 		db:      db,
 		discord: d,
 	}
 
 	// register all Discord slash commands
-	err := b.discord.RegisterSlashCommand(
+	err := w.discord.RegisterSlashCommand(
 		&discord.SlashCommand{
 			Name:        "bew-add-watchlist-item",
 			Description: "Adds an eBay auction to the watchlist.",
-			Handler:     b.addNewAuctionEndingNotification,
+			Handler:     w.addNewAuctionEndingNotification,
 		},
 	)
 	if err != nil {
-		log.Printf("package registration error: %v", err)
+		log.Printf("pkg(%v): registration error: %v", PackageName, err)
 	}
 
 	// register any background jobs
-	utils.RunInBackground("bew:send-due-notifications", b.sendDueNotifications, 30*time.Second)
-	utils.RunInBackground("bew:update-listing-details", b.updateListingDetails, 30*time.Minute)
+	utils.RunInBackground("bew:send-due-notifications", w.sendDueNotifications, 30*time.Second)
+	utils.RunInBackground("bew:update-listing-details", w.updateListingDetails, 30*time.Minute)
 
 	// log that the package has been registered
-	log.Println("package registered: bew - Better eBay Watchlist")
+	log.Printf("pkg(%v): registered", PackageName)
 
 	return nil
 }

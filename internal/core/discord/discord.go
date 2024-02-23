@@ -46,9 +46,9 @@ func NewDiscord(token string, guildID string, applicationID string) (*Discord, e
 // RegisterSlashCommand associates a command with the server, ensuring it is created and
 // subsequently deleted whenever the application stops.
 func (d *Discord) RegisterSlashCommand(cmd *SlashCommand) error {
-	log.Printf("slash command(%v): registered", cmd.Name)
+	log.Printf("discord_slash_cmd(%v): registered", cmd.Name)
 
-	// register the command
+	// register the command definition with Discord
 	createdCmd, err := d.Session.ApplicationCommandCreate(
 		d.applicationID,
 		d.guildID,
@@ -58,9 +58,9 @@ func (d *Discord) RegisterSlashCommand(cmd *SlashCommand) error {
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("slash command(%v): create command: %w", cmd.Name, err)
+		return fmt.Errorf("discord_slash_cmd(%v): create command err: %w", cmd.Name, err)
 	} else {
-		log.Printf("slash command(%v): created id=%v", cmd.Name, createdCmd.ID)
+		log.Printf("discord_slash_cmd(%v): created id=%v", cmd.Name, createdCmd.ID)
 	}
 
 	d.slashCommands[cmd.Name] = cmd
@@ -71,11 +71,12 @@ func (d *Discord) RegisterSlashCommand(cmd *SlashCommand) error {
 // Listen executes the core components of the Discord bot. It waits for interactions and
 // subsequently acts on them.
 func (d *Discord) Listen() error {
+	// add slash command handler
 	d.Session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if h, ok := d.slashCommands[i.ApplicationCommandData().Name]; ok {
-			log.Printf("slash command(%v): executing", h.Name)
+			log.Printf("discord_slash_cmd(%v): executing", h.Name)
 			h.Handler(d, i)
-			log.Printf("slash command(%v): ending", h.Name)
+			log.Printf("discord_slash_cmd(%v): ending", h.Name)
 		}
 	})
 
